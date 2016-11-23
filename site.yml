@@ -1,0 +1,47 @@
+---
+- hosts: all
+  remote_user: {{ nonroot_username }}
+  become: true
+  become_method: sudo
+  tasks:
+    - name: deploy yum template
+      template:
+        src: ose33.j2
+        dest: /etc/yum.repos.d/ose33.repo
+        owner: root
+        mode: 0644
+
+    - name: update the server
+      yum:
+        name: *
+        state: latest
+        update_cache: yes
+
+    - name: restart the servers
+      shell: shutdown -r now
+      async: 0
+      poll: 0
+
+    - name: wait for servers to come back
+      wait_for:
+        port: 22
+        delay: 0
+        timeout: 600
+        state: started
+
+    - name: install required packages
+      yum:
+        name: vim, wget, git, net-tools, bind-utils, iptables-services, bridge-utils, bash-completion, docker-1.10.3, atomic-openshift-utils
+        state: latest
+
+    - name: update /etc/sysconfig/docker with insecure registry setting
+      lineinfile:
+        dest: /etc/sysconfig/docker
+        regexp: '^OPTIONS='
+        line: "OPTIONS='--selinux-enabled --insecure-registry 172.30.0.0/16'"
+
+    - name: set up docker storage
+      template:
+        src: docker-storage-setup.j2
+        dest: /etc/sysconfig/docker-storage-setup
+        owner: root

@@ -1,0 +1,9 @@
+---
+# you'll need to change these
+yum_server: yum.example.com
+docker_volume: /dev/xvdb
+
+# you might need to change these
+rhel_directory: rhel-7-server-rpms
+extras_directory: rhel-7-server-extras-rpms
+ose33_directory: rhel-7-server-ose-3.3-rpms

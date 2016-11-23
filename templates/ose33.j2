@@ -1,0 +1,17 @@
+[rhel-7-server-rpms]
+name: rhel-7-server-rpms
+baseurl: http://{{ yum_server }}/{{ rhel_directory }}
+enabled: 1
+gpgcheck: 0
+
+[rhel-7-server-extras-rpms]
+name: rhel-7-server-extras-rpms
+baseurl: http://{{ yum_server }}/{{ extras_directory }}
+enabled: 1
+gpgcheck: 0
+
+[rhel-7-server-ose-3.3-rpms]
+name: rhel-7-server-ose-3.3-rpms
+baseurl: http://{{ yum_server }}/{{ ose33_directory }}
+enabled: 1
+gpgcheck: 0
