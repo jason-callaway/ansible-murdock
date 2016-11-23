@@ -1,0 +1,191 @@
+---
+- hosts: all
+  remote_user: {{ nonroot_username }}
+  become: true
+  become_method: sudo
+  tasks:
+    - name: deploy yum template
+      template:
+        src: ose33.j2
+        dest: /etc/yum.repos.d/ose33.repo
+        owner: root
+        mode: 0644
+
+    - name: update the server
+      yum:
+        name: *
+        state: latest
+        update_cache: yes
+
+    - name: restart the servers
+      shell: shutdown -r now
+      async: 0
+      poll: 0
+
+    - name: wait for servers to come back
+      wait_for:
+        port: 22
+        delay: 0
+        timeout: 600
+        state: started
+
+- hosts: openshift
+  remote_user: {{ nonroot_username }}
+  become: true
+  become_method: sudo
+  tasks:
+    - name: install required packages
+      yum:
+        name: vim, wget, git, net-tools, bind-utils, iptables-services, bridge-utils, bash-completion, docker-1.10.3, atomic-openshift-utils
+        state: latest
+
+    - name: update /etc/sysconfig/docker with insecure registry setting
+      lineinfile:
+        dest: /etc/sysconfig/docker
+        regexp: '^OPTIONS='
+        line: "OPTIONS='--selinux-enabled --insecure-registry=172.30.0.0/16 --insecure-registry={{ registry_ip }}/32'"
+
+    - name: update /etc/sysconfig/docker with blacklisted registries
+      lineinfile:
+        dest: /etc/sysconfig/docker
+        regexp: '^# BLOCK_REGISTRY='
+        line: "BLOCK_REGISTRY='--block-registry=registry.access.redhat.com --block-registry=docker.io'"
+
+    - name: set up docker storage
+      template:
+        src: docker-storage-setup.j2
+        dest: /etc/sysconfig/docker-storage-setup
+        owner: root
+        mode: 0644
+
+    - name: run docker-storage-setup
+      command: docker-storage-setup
+
+    - name: start the docker service
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+- hosts: gitlab
+  remote_user: {{ nonroot_username }}
+  become: true
+  become_method: sudo
+  tasks:
+    - name: prepare the host
+      yum:
+        name: curl, policycoreutils, openssh-server, openssh-clients, postfix, firewalld
+        state: latest
+
+    - name: start and enable the postfix service
+      service:
+        name: postfix
+        state: started
+        enabled: yes
+
+    - name: start and enable the firewalld service
+      service:
+        name: firewalld
+        state: started
+        enabled: yes
+
+    - name: add http to the list of permitted services
+      firewalld:
+        service: http
+        permanent: true
+        state: enabled
+
+    - name: add https to the list of permitted services
+      firewalld:
+        service: https
+        permanent: true
+        state: enabled
+
+    - name: copy the omnibus installer
+      copy:
+        src: gitlab-ce-8.14.0-ce.0.el7.x86_64.rpm
+        dest: /root/gitlab-ce-8.14.0-ce.0.el7.x86_64.rpm
+        owner: root
+        mode: 0644
+
+    - name: install the gitlab rpm
+      yum:
+        name: /root/gitlab-ce-8.14.0-ce.0.el7.x86_64.rpm
+        state: present
+
+    - name: run gitlab-ctl reconfigure
+      shell: gitlab-ctl reconfigure
+
+- hosts: registry
+  remote_user: {{ nonroot_username }}
+  become: true
+  become_method: sudo
+  tasks:
+    - name: Build partition script
+      template:
+        src: partition.j2
+        dest: /tmp/partition.sh
+        owner: root
+        mode: 0700
+
+    - name: Execute the partition script
+      command: /tmp/partition.sh
+
+    - name: Format EBS volume
+      filesystem:
+        fstype: xfs
+        dev: "{{ docker_volume }}1"
+        force: no
+
+    - name: Mount the volume
+      mount:
+        name: /var/lib/docker-registry
+        src: "{{ docker_volume }}1"
+        fstype: xfs
+        state: mounted
+
+    - name: install the docker, docker registry, and firewalld services
+      yum:
+        name: docker-1.10.3, docker-registry, firewalld
+        state: latest
+
+    - name: update /etc/sysconfig/docker with insecure registry setting
+      lineinfile:
+        dest: /etc/sysconfig/docker
+        regexp: '^OPTIONS='
+        line: "OPTIONS='--selinux-enabled --insecure-registry=0.0.0.0/0'"
+
+    - name: update /etc/sysconfig/docker with blacklisted registries
+      lineinfile:
+        dest: /etc/sysconfig/docker
+        regexp: '^# BLOCK_REGISTRY='
+        line: "BLOCK_REGISTRY='--block-registry=registry.access.redhat.com --block-registry=docker.io'"
+
+    - name: start and enable the docker service
+      service:
+        name: docker
+        state: started
+        enabled: true
+
+    - name: start and enable the docker registry service
+      service:
+        name: docker-registry
+        state: started
+        enabled: true
+
+    - name: start and enable the firewalld service
+      service:
+        name: firewalld
+        state: started
+        enabled: true
+
+    - name: permit tcp port 5000
+      firewalld:
+        port: 5000/tcp
+        permanent: true
+        state: enabled
+
+    - name: copy the docker images to the registry server
+      copy:
+        src: "{{ docker_images_path }}/{{ docker_images_tarball }}"
+        dest: "/root/{{ docker_images_tarball }}"

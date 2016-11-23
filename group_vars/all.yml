@@ -1,9 +1,15 @@
 ---
 # you'll need to change these
-yum_server: yum.example.com
+nonroot_username: ec2-user
+yum_server: yum.murdock.rhtps.io
 docker_volume: /dev/xvdb
+apps_subdomain: apps.murdock.rhtps.io
+docker_images_tarball: ose33_images.tar.gz
+docker_images_path: /mnt
+registry_ip: 172.16.0.1
 
 # you might need to change these
 rhel_directory: rhel-7-server-rpms
 extras_directory: rhel-7-server-extras-rpms
 ose33_directory: rhel-7-server-ose-3.3-rpms
+gitlab_username: murdock

@@ -1,0 +1,6 @@
+#!/bin/bash
+
+if [ ! -b {{ docker_volume }}1 ]
+then
+    (echo n; echo p; echo; echo; echo; echo w) | fdisk {{ docker_volume }}
+fi
