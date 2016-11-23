@@ -1,0 +1,24 @@
+[OSEv3:children]
+masters
+nodes
+
+[OSEv3:vars]
+ansible_ssh_user={{ nonroot_username }}
+ansible_become=true
+openshift_master_default_subdomain={{ apps_subdomain }}
+openshift_master_cluster_public_hostname={{ master_fqdn }}
+deployment_type=openshift-enterprise
+containerized=False
+openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login':'true', 'challenge':'true', 'kind':'HTPasswdPasswordIdentityProvider', 'filename': '/etc/origin/master/htpasswd'}]
+openshift_master_htpasswd_users={'admin':'REMOVED'}
+openshift_router_selector='region=infra'
+openshift_registry_selector='region=infra'
+osm_default_node_selector='region=primary'
+
+[masters]
+ip-172-31-59-230.ec2.internal openshift_hostname=ip-172-31-59-230.ec2.internal openshift_public_hostname=master.ose33test.rhtps.io openshift_ip=172.31.59.230 openshift_public_ip=34.193.26.248
+
+[nodes]
+ip-172-31-59-230.ec2.internal openshift_hostname=ip-172-31-59-230.ec2.internal openshift_public_hostname=master.ose33test.rhtps.io openshift_ip=172.31.59.230 openshift_public_ip=34.193.26.248 openshift_schedulable=True openshift_node_labels="{'region': 'infra', 'zone': 'east'}"
+ip-172-31-59-231.ec2.internal openshift_hostname=ip-172-31-59-231.ec2.internal openshift_public_hostname=node1.ose33test.rhtps.io openshift_ip=172.31.59.231 openshift_public_ip=34.192.10.53 openshift_schedulable=True openshift_node_labels="{'region': 'primary', 'zone': 'east'}"
+ip-172-31-59-232.ec2.internal openshift_hostname=ip-172-31-59-232.ec2.internal openshift_public_hostname=node2.ose33test.rhtps.io openshift_ip=172.31.59.232 openshift_public_ip=52.203.131.121 openshift_schedulable=True openshift_node_labels="{'region': 'primary', 'zone': 'west'}"

@@ -35,15 +35,10 @@ Note that servers 3-6 will require an additional 100GB volume, the path for whic
 These hosts are put into the static inventory file in ```inventory/static/hosts``` in this fashion.
 
 ```
-[openshift]
-master.murdock.rhtps.io
-node1.murdock.rhtps.io
-node2.murdock.rhtps.io
-
-[openshift_masters]
+[masters]
 master.murdock.rhtps.io
 
-[openshift_nodes]
+[nodes]
 node1.murdock.rhtps.io
 node2.murdock.rhtps.io
 
@@ -67,7 +62,6 @@ Before you run the playbooks, there are a few prep steps to take:
 3. Copy the GitLab omnibus installer to the ```gitlab_rpm_path``` directory 
 4. Copy the ```ose33_images.tar.gz``` file into the ```docker_images_path``` directory
 5. Determine your apps subdomain. In the example we're using ```apps.murdock.rhtps.io```. This needs to exist as a ```*``` entry or "wildcard" in DNS that points to your master's FQDN. See the [OpenShift Docs](https://docs.openshift.com/container-platform/3.3/install_config/install/prerequisites.html#wildcard-dns-prereq) for details. 
-6. Set your docker registry IP with the ```registry_ip``` variable
 
 Running the playbooks
 ---------------------

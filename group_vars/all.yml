@@ -6,7 +6,9 @@ docker_volume: /dev/xvdb
 docker_images_path: /mnt
 gitlab_rpm_path: /mnt
 apps_subdomain: apps.murdock.rhtps.io
-registry_ip: 172.16.0.1
+master_fqdn: master.murdock.rhtps.io
+node1_fqdn: node1.murdock.rhtps.io
+node2_fqdn: node2.murdock.rhtps.io
 
 # you might need to change these
 rhel_directory: rhel-7-server-rpms

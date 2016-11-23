@@ -1,9 +1,22 @@
 ---
+- hosts: localhost
+  connection: local
+  become: false
+  tasks:
+    - name: generate a new private key
+      shell: "ssh-keygen -t rsa -f ./mykey -N ''"
+        creates: ./mykey
+
 - hosts: all
   remote_user: {{ nonroot_username }}
   become: true
   become_method: sudo
   tasks:
+    - name: deploy authorized key
+      authorized_key:
+        user: "{{ nonroot_username }}"
+        key: "{{ lookup('file', './mykey.pub') }}"
+
     - name: deploy yum template
       template:
         src: ose33.j2
@@ -29,7 +42,7 @@
         timeout: 600
         state: started
 
-- hosts: openshift
+- hosts: masters:nodes
   remote_user: {{ nonroot_username }}
   become: true
   become_method: sudo
@@ -66,6 +79,25 @@
         name: docker
         state: started
         enabled: yes
+
+- hosts: masters
+  remote_user: {{ nonroot_username }}
+  become: true
+  become_method: sudo
+  tasks:
+    - name: deploy the ssh private key
+      copy:
+        src: ./mykey
+        dest: "~{{ nonroot_username }}/.ssh/id_rsa"
+        owner: root
+        mode: 0600
+
+    - name: deploy the ssh public key
+      copy:
+        src: ./mykey.pub
+        dest: "~{{ nonroot_username }}/.ssh/id_rsa.pub"
+        owner: root
+        mode: 0600
 
 - hosts: gitlab
   remote_user: {{ nonroot_username }}

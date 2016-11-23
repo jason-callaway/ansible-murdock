@@ -1,0 +1,12 @@
+[masters]
+master.murdock.rhtps.io
+
+[nodes]
+node1.murdock.rhtps.io
+node2.murdock.rhtps.io
+
+[gitlab]
+gitlab.murdock.rhtps.io
+
+[registry]
+registry.murdock.rhtps.io
