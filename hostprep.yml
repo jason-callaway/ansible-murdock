@@ -188,4 +188,12 @@
     - name: copy the docker images to the registry server
       copy:
         src: "{{ docker_images_path }}/{{ docker_images_tarball }}"
-        dest: "/root/{{ docker_images_tarball }}"
+        dest: "{{ tarball_untar_dir }}/{{ docker_images_tarball }}"
+        owner: root
+        mode: 0644
+
+    - name: untar the docker images
+      shell: "tar xvf {{ tarball_untar_dir }}/{{ docker_images_tarball }}"
+
+    - name: load the docker images
+      shell: "for i in $(ls *.tar); do docker load -i {{ tarball_untar_dir }}/${i}"

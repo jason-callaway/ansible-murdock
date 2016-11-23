@@ -7,6 +7,7 @@ Overview
 --------
 The steps in this deployment process are:
 
+* Provision your hosts and their extra volumes
 * Set up your yum repos based on the tarballs you were provided
 * Modify the variables in ```group_vars/all.yml``` to match your environment
 * Run the ```hostprep.yml``` playbook
@@ -24,7 +25,7 @@ You'll need a total of 6 RHEL VMs, running at least 7.2.
   * rhel-7-server-ose-3.3-rpms
 2. GitLab server
 3. Docker registry
-  * Requires at least 100GB available from /root for untar-ing the Docker images
+  * Requires at least 100GB available from the ```tarball_untar_dir``` directory for untar-ing the Docker images
 4. OpenShift master
 5. OpenShift node1
 6. OpenShift node2
@@ -53,14 +54,28 @@ gitlab.murdock.rhtps.io
 registry.murdock.rhtps.io
 ```
 
+Prep work
+---------
+
+Before you run the playbooks, there are a few prep steps to take:
+1. Set up the ```hosts``` file described above
+2. Set the variables in ```group_vars/all.yml```:
+  1. ```nonroot_username``` is the name you'll log into your servers with via ssh
+  2. ```yum_server``` is the FQDN or IP address of your yum server
+  3. ```docker_volume``` is the device path for the secondary disk that has been presented to your VMs. As an example, in AWS, this is typically ```/dev/xvdb```.
+3. Copy the GitLab omnibus installer to the ```gitlab_rpm_path``` directory 
+4. Copy the ```ose33_images.tar.gz``` file into the ```docker_images_path``` directory
+5. Determine your apps subdomain. In the example we're using ```apps.murdock.rhtps.io```. This needs to exist as a ```*``` entry or "wildcard" in DNS that points to your master's FQDN. See the [OpenShift Docs](https://docs.openshift.com/container-platform/3.3/install_config/install/prerequisites.html#wildcard-dns-prereq) for details. 
+6. Set your docker registry IP with the ```registry_ip``` variable
+
 Running the playbooks
 ---------------------
 
 When you have yum populated with the required repos, use this process to deploy.
 
 Notes:
-* my_key.pem matches whatever is in your remote systems' nonroot user's ```.ssh/authorized_keys``` file.
-* ```inventory/static/hosts``` has your six systems' hostnames grouped by role as above.
+* ```my_key.pem``` matches whatever is in your remote systems' nonroot user's ```.ssh/authorized_keys``` file
+* ```inventory/static/hosts``` has your six systems' hostnames grouped by role as above
 
 ```
 # ssh-agent bash
