@@ -11,8 +11,8 @@ The steps in this deployment process are:
 * Set up your yum repos based on the tarballs you were provided
 * Modify the variables in ```group_vars/all.yml``` to match your environment
 * Run the ```hostprep.yml``` playbook
-* Set the GitLab root password, create a user and set the user's password
-* Run the ```deploy.yml``` playbook
+* Run the OpenShift advanced installer playbook
+* Set the GitLab root password, create a user and set the user's password, upload some repos
 
 Required Hosts
 --------------
