@@ -25,7 +25,7 @@ You'll need a total of 6 RHEL VMs, running at least 7.2.
   * rhel-7-server-ose-3.3-rpms
 2. GitLab server
 3. Docker registry
-  * Requires at least 100GB available from the ```tarball_untar_dir``` directory for untar-ing the Docker images
+  * Requires at least 30GB available from the ```tarball_untar_dir``` directory for untar-ing the Docker images
 4. OpenShift master
 5. OpenShift node1
 6. OpenShift node2
