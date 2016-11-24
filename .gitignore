@@ -94,7 +94,8 @@ ENV/
 .idea/
 mykey
 mykey.pub
-files/*
+files/gitlab-ce-8.14.0-ce.0.el7.x86_64.rpm
+files/ose33_images.tar.gz
+files/ose33_repos.tar.gz
 my_*
 inventory/deployment
-inventory/deployment/*

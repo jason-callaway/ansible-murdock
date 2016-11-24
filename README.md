@@ -35,11 +35,13 @@ Note that servers 3-6 will require an additional 100GB volume, the path for whic
 These hosts are put into the static inventory file in ```inventory/static/hosts``` in this fashion.
 
 ```
-[masters]
+[master]
 master.murdock.rhtps.io
 
-[nodes]
+[node1]
 node1.murdock.rhtps.io
+
+[node2]
 node2.murdock.rhtps.io
 
 [gitlab]
@@ -84,16 +86,10 @@ If you need to re-run the playbook, time can be saved by:
 # ansible-playbook -i inventory/static/hosts hostprep.yml --skip-tags=update_reboot
 ```
 
-After a successful run, set your GitLab's root password by navigating to its hostname in your browser.
-
-Next, create an administrative user and set its password. See the [GitLab Documentation](https://docs.gitlab.com/ce/workflow/add-user/add-user.html) for details.
-
-Also add the SSH public key, ```mykey.pub``` located in this repo's directory, that was created by the previous playbook. The process for adding a key is in the [GitLab Documentation](https://docs.gitlab.com/ee/gitlab-basics/create-your-ssh-keys.html).
-
-Now, you can complete the deployment.
+After a successful run, it's time to deploy OpenShift. SSH to the master and run:
 
 ```
-# ansible-playbook -i inventory/static/hosts deploy.yml
+# ansible-playbook -i /root/hosts /usr/share/ansible/openshift-ansible/playbooks/byo/config.yml
 ```
 
 When finished, you need to create static users on the OpenShift Master.
@@ -105,6 +101,13 @@ $ sudo su -
 # oadm policy add-cluster-role-to-user cluster-admin murdock
 ```
 
-Now, using this username and password, log into OpenShift and create some apps!
+Now, using this username and password, log into OpenShift.
 
 URL: ```https://master.murdock.rhtps.io:8443/console```
+
+GitLab needs to be configured in order to create apps. This is a manual process.
+
+* Set your GitLab's root password by navigating to its hostname in your browser.
+* Create an administrative user and set its password. See the [GitLab Documentation](https://docs.gitlab.com/ce/workflow/add-user/add-user.html) for details.
+* Also add the SSH public key, ```mykey.pub``` located in this repo's directory, that was created by the previous playbook. The process for adding a key is in the [GitLab Documentation](https://docs.gitlab.com/ee/gitlab-basics/create-your-ssh-keys.html).
+* Create projects for the OpenShift repos in ```ose33_repos.tar.gz``` and git push the repos into those projects.

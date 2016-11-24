@@ -1,2 +1,0 @@
-dependencies:
-- role: openshift_facts

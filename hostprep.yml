@@ -115,14 +115,14 @@
     - name: deploy the ssh private key
       copy:
         src: ./mykey
-        dest: "~{{ nonroot_username }}/.ssh/id_rsa"
+        dest: "/root/.ssh/id_rsa"
         owner: root
         mode: 0600
 
     - name: deploy the ssh public key
       copy:
         src: ./mykey.pub
-        dest: "~{{ nonroot_username }}/.ssh/id_rsa.pub"
+        dest: "/root/.ssh/id_rsa.pub"
         owner: root
         mode: 0600
 
@@ -317,9 +317,10 @@
       tags:
         - bigfiles
 
-- hosts: localhost
-  connection: local
-  become: false
+- hosts: master
+  remote_user: "{{ nonroot_username }}"
+  become: true
+  become_method: sudo
   tasks:
     - name: lookup master, node1, and node 2 hostnames and ips
       set_fact:
@@ -330,12 +331,12 @@
         node2_ip: "{{ lookup('file', './my_node2').split(':')[0] }}"
         node2_hostname: "{{ lookup('file', './my_node2').split(':')[1] }}"
 
-    - name: ensure local inventory directory exists
-      file:
-        path: "./inventory/deployment"
-        state: directory
-
-    - name: generate deployment inventory
+    - name: generate deployment inventory on master
       template:
         src: hosts.j2
-        dest: "./inventory/deployment/hosts"
+        dest: "/root/hosts"
+
+    - name: copy ssh config
+      copy:
+        src: config
+        dest: /root/.ssh/config
