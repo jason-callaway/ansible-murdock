@@ -110,4 +110,11 @@ GitLab needs to be configured in order to create apps. This is a manual process.
 * Set your GitLab's root password by navigating to its hostname in your browser.
 * Create an administrative user and set its password. See the [GitLab Documentation](https://docs.gitlab.com/ce/workflow/add-user/add-user.html) for details.
 * Also add the SSH public key, ```mykey.pub``` located in this repo's directory, that was created by the previous playbook. The process for adding a key is in the [GitLab Documentation](https://docs.gitlab.com/ee/gitlab-basics/create-your-ssh-keys.html).
-* Create projects for the OpenShift repos in ```ose33_repos.tar.gz``` and git push the repos into those projects.
+* Create projects for the OpenShift repos in ```ose33_repos.tar.gz``` and git push the repos into those projects. Example:
+  * Create a public project called ```cakephp-ex```
+  * Untar the ```ose33_repos.tar.gz``` tarball
+  * ```cd cakephp-ex```
+  * Now set the upstream with ```git remote remove origin; git remote add origin git@gitlab.murdock.rhtps.io:murdock/cakephp-ex.git```
+  * And push the code into GitLab ```git push -u origin master```
+* Now when creating apps in OpenShift you can point to your GitLab repos
+  
