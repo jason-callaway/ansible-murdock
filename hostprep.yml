@@ -160,11 +160,11 @@
   tasks:
     - name: capture node2 internal ip
       set_fact:
-        node1_ip: "{{ hostvars[inventory_hostname].ansible_eth0.ipv4.address }}"
+        node2_ip: "{{ hostvars[inventory_hostname].ansible_eth0.ipv4.address }}"
 
     - name: capture node2 internal hostname
       set_fact:
-        node1_hostname: "{{ hostvars[inventory_hostname].ansible_fqdn }}"
+        node2_hostname: "{{ hostvars[inventory_hostname].ansible_fqdn }}"
 
     - name: save off the node2 ip and hostname
       local_action: copy content="{{ node2_ip }}:{{ node2_hostname }}" dest="./my_node2"
