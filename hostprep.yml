@@ -258,12 +258,18 @@
         dest: "{{ tarball_untar_dir }}/{{ docker_images_tarball }}"
         owner: root
         mode: 0644
+      tags:
+        - bigfiles
 
     - name: untar the docker images
       shell: "tar xvf {{ tarball_untar_dir }}/{{ docker_images_tarball }}"
       args:
         chdir: "{{ tarball_untar_dir }}"
         creates: "{{ tarball_untar_dir }}/ruby-23-rhel7.tar"
+      tags:
+        - bigfiles
 
     - name: load the docker images
       shell: "for i in $(ls *.tar); do docker load -i {{ tarball_untar_dir }}/${i}; done"
+      tags:
+        - bigfiles
