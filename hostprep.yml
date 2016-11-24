@@ -5,10 +5,11 @@
   tasks:
     - name: generate a new private key
       shell: "ssh-keygen -t rsa -f ./mykey -N ''"
+      args:
         creates: ./mykey
 
 - hosts: all
-  remote_user: {{ nonroot_username }}
+  remote_user: "{{ nonroot_username }}"
   become: true
   become_method: sudo
   tasks:
@@ -16,6 +17,11 @@
       authorized_key:
         user: "{{ nonroot_username }}"
         key: "{{ lookup('file', './mykey.pub') }}"
+
+    - name: remove old yum files
+      file:
+        path: /etc/yum.repos.d/*
+        state: absent
 
     - name: deploy yum template
       template:
@@ -26,14 +32,18 @@
 
     - name: update the server
       yum:
-        name: *
+        name: "*"
         state: latest
         update_cache: yes
+      tags:
+        - update_reboot
 
     - name: restart the servers
       shell: shutdown -r now
       async: 0
       poll: 0
+      tags:
+        - update_reboot
 
     - name: wait for servers to come back
       wait_for:
@@ -41,16 +51,33 @@
         delay: 0
         timeout: 600
         state: started
+      tags:
+        - update_reboot
 
-- hosts: masters:nodes
-  remote_user: {{ nonroot_username }}
+- hosts: registry
+  remote_user: "{{ nonroot_username }}"
   become: true
   become_method: sudo
+  tasks:
+    - set_fact:
+        registry_ip: "{{ hostvars[inventory_hostname].ansible_eth0.ipv4.address }}"
+
+    - name: save off the registry ip
+      local_action: copy content="{{ registry_ip }}" dest="./my_registry"
+
+- hosts: masters:nodes
+  remote_user: "{{ nonroot_username }}"
+  become: true
+  become_method: sudo
+  vars:
+    registry_ip: "{{ lookup('file', './my_registry') }}"
   tasks:
     - name: install required packages
       yum:
         name: vim, wget, git, net-tools, bind-utils, iptables-services, bridge-utils, bash-completion, docker-1.10.3, atomic-openshift-utils
         state: latest
+
+    - debug: var=registry_ip
 
     - name: update /etc/sysconfig/docker with insecure registry setting
       lineinfile:
@@ -81,7 +108,7 @@
         enabled: yes
 
 - hosts: masters
-  remote_user: {{ nonroot_username }}
+  remote_user: "{{ nonroot_username }}"
   become: true
   become_method: sudo
   tasks:
@@ -100,7 +127,7 @@
         mode: 0600
 
 - hosts: gitlab
-  remote_user: {{ nonroot_username }}
+  remote_user: "{{ nonroot_username }}"
   become: true
   become_method: sudo
   tasks:
@@ -135,21 +162,23 @@
 
     - name: copy the omnibus installer
       copy:
-        src: gitlab-ce-8.14.0-ce.0.el7.x86_64.rpm
-        dest: /root/gitlab-ce-8.14.0-ce.0.el7.x86_64.rpm
+        src: "{{ gitlab_rpm }}"
+        dest: "{{ tarball_untar_dir }}/{{ gitlab_rpm }}"
         owner: root
         mode: 0644
 
     - name: install the gitlab rpm
       yum:
-        name: /root/gitlab-ce-8.14.0-ce.0.el7.x86_64.rpm
+        name: "{{ tarball_untar_dir }}/{{ gitlab_rpm }}"
         state: present
 
     - name: run gitlab-ctl reconfigure
-      shell: gitlab-ctl reconfigure
+      shell: "gitlab-ctl reconfigure; touch /root/gitlab_configured"
+      args:
+        creates: "/root/gitlab_configured"
 
 - hosts: registry
-  remote_user: {{ nonroot_username }}
+  remote_user: "{{ nonroot_username }}"
   become: true
   become_method: sudo
   tasks:
@@ -193,6 +222,12 @@
         regexp: '^# BLOCK_REGISTRY='
         line: "BLOCK_REGISTRY='--block-registry=registry.access.redhat.com --block-registry=docker.io'"
 
+    - name: set up docker registry search backend
+      lineinfile:
+        dest: /etc/sysconfig/docker-registry
+        line: "SEARCH_BACKEND=sqlalchemy"
+        state: present
+
     - name: start and enable the docker service
       service:
         name: docker
@@ -226,6 +261,9 @@
 
     - name: untar the docker images
       shell: "tar xvf {{ tarball_untar_dir }}/{{ docker_images_tarball }}"
+      args:
+        chdir: "{{ tarball_untar_dir }}"
+        creates: "{{ tarball_untar_dir }}/ruby-23-rhel7.tar"
 
     - name: load the docker images
-      shell: "for i in $(ls *.tar); do docker load -i {{ tarball_untar_dir }}/${i}"
+      shell: "for i in $(ls *.tar); do docker load -i {{ tarball_untar_dir }}/${i}; done"

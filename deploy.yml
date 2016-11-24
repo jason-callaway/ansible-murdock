@@ -1,0 +1,7 @@
+---
+- hosts: gitlab
+  remote_user: {{ nonroot_username }}
+  become: true
+  become_method: sudo
+  tasks:
+    - name: Build partition script

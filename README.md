@@ -69,18 +69,26 @@ Running the playbooks
 When you have yum populated with the required repos, use this process to deploy.
 
 Notes:
-* ```my_key.pem``` matches whatever is in your remote systems' nonroot user's ```.ssh/authorized_keys``` file
+* ```hostkey``` matches whatever is in your remote systems' nonroot user's ```.ssh/authorized_keys``` file
 * ```inventory/static/hosts``` has your six systems' hostnames grouped by role as above
 
 ```
 # ssh-agent bash
-# ssh-add my_key.pem
+# ssh-add hostkey
 # ansible-playbook -i inventory/static/hosts hostprep.yml 
+```
+
+If you need to re-run the playbook, time can be saved by:
+
+```
+# ansible-playbook -i inventory/static/hosts hostprep.yml --skip-tags=update_reboot
 ```
 
 After a successful run, set your GitLab's root password by navigating to its hostname in your browser.
 
 Next, create an administrative user and set its password. See the [GitLab Documentation](https://docs.gitlab.com/ce/workflow/add-user/add-user.html) for details.
+
+Also add the SSH public key, ```mykey.pub``` located in this repo's directory, that was created by the previous playbook. The process for adding a key is in the [GitLab Documentation](https://docs.gitlab.com/ee/gitlab-basics/create-your-ssh-keys.html).
 
 Now, you can complete the deployment.
 

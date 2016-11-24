@@ -3,7 +3,7 @@
 nonroot_username: ec2-user
 yum_server: yum.murdock.rhtps.io
 docker_volume: /dev/xvdb
-docker_images_path: /mnt
+docker_images_path: ./
 gitlab_rpm_path: /mnt
 apps_subdomain: apps.murdock.rhtps.io
 master_fqdn: master.murdock.rhtps.io
@@ -15,5 +15,6 @@ rhel_directory: rhel-7-server-rpms
 extras_directory: rhel-7-server-extras-rpms
 ose33_directory: rhel-7-server-ose-3.3-rpms
 docker_images_tarball: ose33_images.tar.gz
+gitlab_rpm: gitlab-ce-8.14.0-ce.0.el7.x86_64.rpm
 gitlab_username: murdock
 tarball_untar_dir: /root
