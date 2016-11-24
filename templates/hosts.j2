@@ -16,11 +16,9 @@ openshift_registry_selector='region=infra'
 osm_default_node_selector='region=primary'
 
 [masters]
-ip-172-31-59-230.ec2.internal openshift_hostname=ip-172-31-59-230.ec2.internal openshift_public_hostname=master.ose33test.rhtps.io openshift_ip=172.31.59.230 openshift_public_ip=34.193.26.248
+{{ master_hostname }} openshift_hostname={{ master_hostname }} openshift_public_hostname={{ master_fqdn }} openshift_ip={{ master_ip }} openshift_public_ip={{ master_external_ip }}
 
 [nodes]
-ip-172-31-59-230.ec2.internal openshift_hostname=ip-172-31-59-230.ec2.internal openshift_public_hostname=master.ose33test.rhtps.io openshift_ip=172.31.59.230 openshift_public_ip=34.193.26.248 openshift_schedulable=True openshift_node_labels="{'region': 'infra', 'zone': 'east'}"
-{% for node in nodes %}
-ip-172-31-59-231.ec2.internal openshift_hostname=ip-172-31-59-231.ec2.internal openshift_public_hostname=node1.ose33test.rhtps.io openshift_ip=172.31.59.231 openshift_public_ip=34.192.10.53 openshift_schedulable=True openshift_node_labels="{'region': 'primary', 'zone': 'east'}"
-ip-172-31-59-232.ec2.internal openshift_hostname=ip-172-31-59-232.ec2.internal openshift_public_hostname=node2.ose33test.rhtps.io openshift_ip=172.31.59.232 openshift_public_ip=52.203.131.121 openshift_schedulable=True openshift_node_labels="{'region': 'primary', 'zone': 'west'}"
-{% endfor %}
+{{ master_hostname }} openshift_hostname={{ master_hostname }} openshift_public_hostname={{ master_fqdn }} openshift_ip={{ master_ip }} openshift_public_ip={{ master_external_ip }} openshift_schedulable=True openshift_node_labels="{'region': 'infra', 'zone': 'east'}"
+{{ node1_hostname }} openshift_hostname={{ node1_hostname }} openshift_public_hostname={{ node1_fqdn }} openshift_ip={{ node1_ip }} openshift_public_ip={{ node1_external_ip }} openshift_schedulable=True openshift_node_labels="{'region': 'primary', 'zone': 'east'}"
+{{ node2_hostname }} openshift_hostname={{ node2_hostname }} openshift_public_hostname={{ node2_fqdn }} openshift_ip={{ node2_ip }} openshift_public_ip={{ node2_external_ip }} openshift_schedulable=True openshift_node_labels="{'region': 'primary', 'zone': 'east'}"

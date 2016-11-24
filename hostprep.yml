@@ -65,7 +65,7 @@
     - name: save off the registry ip
       local_action: copy content="{{ registry_ip }}" dest="./my_registry"
 
-- hosts: masters:nodes
+- hosts: master:node1:node2
   remote_user: "{{ nonroot_username }}"
   become: true
   become_method: sudo
@@ -107,7 +107,7 @@
         state: started
         enabled: yes
 
-- hosts: masters
+- hosts: master
   remote_user: "{{ nonroot_username }}"
   become: true
   become_method: sudo
@@ -125,6 +125,49 @@
         dest: "~{{ nonroot_username }}/.ssh/id_rsa.pub"
         owner: root
         mode: 0600
+
+    - name: capture master internal ip
+      set_fact:
+        master_ip: "{{ hostvars[inventory_hostname].ansible_eth0.ipv4.address }}"
+
+    - name: capture master internal hostname
+      set_fact:
+        master_hostname: "{{ hostvars[inventory_hostname].ansible_fqdn }}"
+
+    - name: save off the master ip and hostname
+      local_action: copy content="{{ master_ip }}:{{ master_hostname }}" dest="./my_master"
+
+- hosts: node1
+  remote_user: "{{ nonroot_username }}"
+  become: true
+  become_method: sudo
+  tasks:
+    - name: capture node1 internal ip
+      set_fact:
+        node1_ip: "{{ hostvars[inventory_hostname].ansible_eth0.ipv4.address }}"
+
+    - name: capture node1 internal hostname
+      set_fact:
+        node1_hostname: "{{ hostvars[inventory_hostname].ansible_fqdn }}"
+
+    - name: save off the node1 ip and hostname
+      local_action: copy content="{{ node1_ip }}:{{ node1_hostname }}" dest="./my_node1"
+
+- hosts: node2
+  remote_user: "{{ nonroot_username }}"
+  become: true
+  become_method: sudo
+  tasks:
+    - name: capture node2 internal ip
+      set_fact:
+        node1_ip: "{{ hostvars[inventory_hostname].ansible_eth0.ipv4.address }}"
+
+    - name: capture node2 internal hostname
+      set_fact:
+        node1_hostname: "{{ hostvars[inventory_hostname].ansible_fqdn }}"
+
+    - name: save off the node2 ip and hostname
+      local_action: copy content="{{ node2_ip }}:{{ node2_hostname }}" dest="./my_node2"
 
 - hosts: gitlab
   remote_user: "{{ nonroot_username }}"
@@ -273,3 +316,26 @@
       shell: "for i in $(ls *.tar); do docker load -i {{ tarball_untar_dir }}/${i}; done"
       tags:
         - bigfiles
+
+- hosts: localhost
+  connection: local
+  become: false
+  tasks:
+    - name: lookup master, node1, and node 2 hostnames and ips
+      set_fact:
+        master_ip: "{{ lookup('file', './my_master').split(':')[0] }}"
+        master_hostname: "{{ lookup('file', './my_master').split(':')[1] }}"
+        node1_ip: "{{ lookup('file', './my_node1').split(':')[0] }}"
+        node1_hostname: "{{ lookup('file', './my_node1').split(':')[1] }}"
+        node2_ip: "{{ lookup('file', './my_node2').split(':')[0] }}"
+        node2_hostname: "{{ lookup('file', './my_node2').split(':')[1] }}"
+
+    - name: ensure local inventory directory exists
+      file:
+        path: "./inventory/deployment"
+        state: directory
+
+    - name: generate deployment inventory
+      template:
+        src: hosts.j2
+        dest: "./inventory/deployment/hosts"

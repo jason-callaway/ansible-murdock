@@ -9,6 +9,9 @@ apps_subdomain: apps.murdock.rhtps.io
 master_fqdn: master.murdock.rhtps.io
 node1_fqdn: node1.murdock.rhtps.io
 node2_fqdn: node2.murdock.rhtps.io
+master_external_ip: 34.193.61.244
+node1_external_ip: 34.193.52.174
+node2_external_ip: 34.192.243.104
 
 # you might need to change these
 rhel_directory: rhel-7-server-rpms

@@ -94,7 +94,4 @@ ENV/
 mykey
 mykey.pub
 files/*
-my_registry
-my_master
-my_node1
-my_node2
+my_*

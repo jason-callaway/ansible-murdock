@@ -1,8 +1,10 @@
-[masters]
+[master]
 master.murdock.rhtps.io
 
-[nodes]
+[node1]
 node1.murdock.rhtps.io
+
+[node2]
 node2.murdock.rhtps.io
 
 [gitlab]
