@@ -61,8 +61,9 @@ Before you run the playbooks, there are a few prep steps to take:
   * The ```nonroot_username``` variable is the name you'll log into your servers with via ssh.
   * The ```yum_server``` variable is the FQDN or IP address of your yum server.
   * The ```docker_volume``` variable is the device path for the secondary disk that has been presented to your VMs. As an example, in AWS, this is typically ```/dev/xvdb```.
+  * The master and node hostname and IP variables also need to be set.
 3. Copy the GitLab omnibus installer to the ```gitlab_rpm_path``` directory 
-4. Copy the ```ose33_images.tar.gz``` file into the ```docker_images_path``` directory
+4. Copy the ```ose33_images.tar.gz``` file into the ```files``` directory
 5. Determine your apps subdomain. In the example we're using ```apps.murdock.rhtps.io```. This needs to exist as a ```*``` entry or "wildcard" in DNS that points to your master's FQDN. See the [OpenShift Docs](https://docs.openshift.com/container-platform/3.3/install_config/install/prerequisites.html#wildcard-dns-prereq) for details. 
 
 Running the playbooks
